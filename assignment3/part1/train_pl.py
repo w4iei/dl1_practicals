@@ -42,7 +42,7 @@ class VAE(pl.LightningModule):
         """
         super().__init__()
         self.save_hyperparameters()
-
+        self.latent_dim = z_dim
         self.encoder = CNNEncoder(z_dim=z_dim, num_filters=num_filters)
         self.decoder = CNNDecoder(z_dim=z_dim, num_filters=num_filters)
 
@@ -70,10 +70,21 @@ class VAE(pl.LightningModule):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        L_rec = None
-        L_reg = None
-        bpd = None
-        raise NotImplementedError
+        # Encoder
+        mean, log_std = self.encoder(imgs)
+        z = sample_reparameterize(mean, torch.exp(log_std))
+
+        # Decoder
+        estimate = self.decoder(z).softmax(dim=1)
+        # Sample using the categorical distribution:
+        batch_size, channels, h, w = estimate.shape
+        # sampled = estimate
+        # sampled = sampled.moveaxis(1, 3).reshape((batch_size*h*w, channels))
+        # sampled = torch.multinomial(sampled, num_samples=1)
+        # reconstruction = sampled.reshape((batch_size, 1,  h, w))
+        L_rec = F.cross_entropy(estimate.squeeze(dim=1), imgs.squeeze(dim=1), reduction='sum')/batch_size
+        L_reg = torch.mean(KLD(mean, log_std))
+        bpd = elbo_to_bpd(L_reg+L_rec, imgs.shape)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -91,8 +102,8 @@ class VAE(pl.LightningModule):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        x_samples = None
-        raise NotImplementedError
+        z = torch.randn(batch_size, self.latent_dim).to(self.device)
+        x_samples = self.decoder(z)
         #######################
         # END OF YOUR CODE    #
         #######################
