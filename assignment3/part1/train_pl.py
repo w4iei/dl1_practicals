@@ -78,10 +78,7 @@ class VAE(pl.LightningModule):
         estimate = self.decoder(z).softmax(dim=1)
         # Sample using the categorical distribution:
         batch_size, channels, h, w = estimate.shape
-        # sampled = estimate
-        # sampled = sampled.moveaxis(1, 3).reshape((batch_size*h*w, channels))
-        # sampled = torch.multinomial(sampled, num_samples=1)
-        # reconstruction = sampled.reshape((batch_size, 1,  h, w))
+
         L_rec = F.cross_entropy(estimate.squeeze(dim=1), imgs.squeeze(dim=1), reduction='sum')/batch_size
         L_reg = torch.mean(KLD(mean, log_std))
         bpd = elbo_to_bpd(L_reg+L_rec, imgs.shape)
@@ -103,11 +100,16 @@ class VAE(pl.LightningModule):
         # PUT YOUR CODE HERE  #
         #######################
         z = torch.randn(batch_size, self.latent_dim).to(self.device)
-        x_samples = self.decoder(z)
+        x_samples = self.decoder(z).softmax(dim=1)
+
+        batch_size, channels, h, w = x_samples.shape
+        sampled = x_samples.moveaxis(1, 3).reshape((batch_size * h * w, channels))
+        sampled = torch.multinomial(sampled, num_samples=1)
+        return_result = sampled.reshape((batch_size, 1,  h, w))
         #######################
         # END OF YOUR CODE    #
         #######################
-        return x_samples
+        return return_result
 
     def configure_optimizers(self):
         # Create optimizer
