@@ -306,7 +306,7 @@ class AdversarialAE(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        z = torch.randn((batch_size, self.latent_dim)).to(self.device)
+        z = torch.randn((batch_size, self.z_dim)).to(self.device)
         x = self.decoder(z)  # softmax??
         #######################
         # END OF YOUR CODE    #
