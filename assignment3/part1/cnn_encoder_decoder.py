@@ -42,12 +42,12 @@ class CNNEncoder(nn.Module):
         self.net = nn.Sequential(
             nn.Conv2d(num_input_channels, num_filters, kernel_size=3, padding=1, stride=2),  # 32x32 => 16x16
             act_fn(),
-            # nn.Conv2d(num_filters, num_filters, kernel_size=3, padding=1),
-            # act_fn(),
+            nn.Conv2d(num_filters, num_filters, kernel_size=3, padding=1),
+            act_fn(),
             nn.Conv2d(num_filters, 2 * num_filters, kernel_size=3, padding=1, stride=2),  # 16x16 => 8x8
             act_fn(),
-            # nn.Conv2d(2 * num_filters, 2 * num_filters, kernel_size=3, padding=1),
-            # act_fn(),
+            nn.Conv2d(2 * num_filters, 2 * num_filters, kernel_size=3, padding=1),
+            act_fn(),
             nn.Conv2d(2 * num_filters, 2 * num_filters, kernel_size=3, padding=1, stride=2),  # 8x8 => 4x4
             act_fn(),
             nn.Flatten(),  # Image grid to single feature vector
@@ -110,12 +110,12 @@ class CNNDecoder(nn.Module):
             nn.ConvTranspose2d(2 * self.num_filters, 2 * self.num_filters, kernel_size=3, output_padding=0, padding=1, stride=2),
             # 4x4 => 8x8
             act_fn(),
-            # nn.Conv2d(2 * self.num_filters, 2 * self.num_filters, kernel_size=3, padding=1),
-            # act_fn(),
+            nn.Conv2d(2 * self.num_filters, 2 * self.num_filters, kernel_size=3, padding=1),
+            act_fn(),
             nn.ConvTranspose2d(2 * self.num_filters, self.num_filters, kernel_size=3, output_padding=1, padding=1, stride=2),  # 8x8 => 16x16
             act_fn(),
-            # nn.Conv2d(self.num_filters, self.num_filters, kernel_size=3, padding=1),
-            # act_fn(),
+            nn.Conv2d(self.num_filters, self.num_filters, kernel_size=3, padding=1),
+            act_fn(),
             nn.ConvTranspose2d(self.num_filters, num_input_channels, kernel_size=3, output_padding=1, padding=1, stride=2),
             # 16x16 => 32x32
         )
