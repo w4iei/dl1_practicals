@@ -108,11 +108,12 @@ def visualize_manifold(decoder, grid_size=20):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    mesh_grid = torch.meshgrid(torch.range(0.5/grid_size, 1.5/grid_size), torch.range(0.5/grid_size, 1.5/grid_size))
+    mesh_grid = torch.meshgrid(torch.range(0.5/grid_size, grid_size-grid_size*0.5, 1/grid_size),
+                (torch.range(0.5/grid_size, grid_size-grid_size*0.5, 1/grid_size)))
     normal = torch.distributions.Normal(0, 1)
     mesh_normal = normal.icdf(mesh_grid).to(decoder.net.device)
     results = decoder.net(mesh_normal).softmax(dim=1)
-    img_grid = make_grid(results)
+    img_grid = make_grid(results, nrow=grid_size, normalize=True, value_range=(0, 1), pad_value=1)
     #######################
     # END OF YOUR CODE    #
     #######################
