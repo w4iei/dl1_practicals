@@ -16,4 +16,4 @@ module load Anaconda3/2021.05
 # Activate your environment
 source activate dl2022
 # Run your code
-srun python -u train.py --lambda_ 1 --data_dir $TMPDIR/
+srun python -u train.py --z_dim 2 --data_dir $TMPDIR/
