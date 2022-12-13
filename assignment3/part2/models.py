@@ -273,12 +273,12 @@ class AdversarialAE(nn.Module):
         #######################
 
         z_fake_pred = self.discriminator(z_fake)
-        loss_fake = F.binary_cross_entropy_with_logits(z_fake_pred, torch.zeros(z_fake_pred.shape))
+        loss_fake = F.binary_cross_entropy_with_logits(z_fake_pred, torch.zeros(z_fake_pred.shape).to(z_fake_pred.device))
         # fake should all result in a 0 prediction from the discriminator:
 
-        z_drawn = torch.randn(z_fake.shape)
+        z_drawn = torch.randn(z_fake.shape).to(z_fake.device)
         z_drawn_pred = self.discriminator(z_drawn)
-        loss_real = F.binary_cross_entropy_with_logits(z_drawn_pred, torch.ones(z_drawn_pred.shape))
+        loss_real = F.binary_cross_entropy_with_logits(z_drawn_pred, torch.ones(z_drawn_pred.shape).to(z_drawn_pred.device))
 
         acc = (torch.sum(z_fake_pred == torch.zeros(z_fake_pred.shape)) +
                torch.sum(z_drawn_pred == torch.ones(z_drawn_pred.shape))) / (z_fake_pred.numel()*2)
