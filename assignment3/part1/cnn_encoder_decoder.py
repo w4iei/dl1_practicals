@@ -72,7 +72,7 @@ class CNNEncoder(nn.Module):
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        forward_values = self.net(x)
+        forward_values = self.net(x).flatten(start_dim=1)
         mean = self.means(forward_values)
         log_std = self.sigmas(forward_values)
         #######################
