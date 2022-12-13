@@ -75,7 +75,7 @@ class VAE(pl.LightningModule):
         z = sample_reparameterize(mean, torch.exp(log_std))
 
         # Decoder
-        estimate = self.decoder(z).softmax(dim=1)
+        estimate = self.decoder(z)
         # Sample using the categorical distribution:
         batch_size, channels, h, w = estimate.shape
 
