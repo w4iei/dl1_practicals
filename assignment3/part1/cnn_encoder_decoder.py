@@ -50,7 +50,7 @@ class CNNEncoder(nn.Module):
             act_fn(),
             nn.Conv2d(2 * num_filters, 2 * num_filters, kernel_size=3, padding=1, stride=2),  # 8x8 => 4x4
             act_fn(),
-            nn.Flatten(start_dim=1),  # Image grid to single feature vector
+            nn.Flatten(),  # Image grid to single feature vector
         )
         self.means = nn.Linear(2 * 16 * num_filters, z_dim)
         self.sigmas = nn.Linear(2 * 16 * num_filters, z_dim)
