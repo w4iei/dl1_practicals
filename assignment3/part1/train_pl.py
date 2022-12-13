@@ -80,7 +80,7 @@ class VAE(pl.LightningModule):
         batch_size, channels, h, w = estimate.shape
 
         L_rec = F.cross_entropy(estimate.squeeze(dim=1), imgs.squeeze(dim=1), reduction='sum')/batch_size
-        L_reg = torch.mean(KLD(mean, log_std))
+        L_reg = torch.sum(KLD(mean, log_std))
         bpd = elbo_to_bpd(L_reg+L_rec, imgs.shape)
         #######################
         # END OF YOUR CODE    #
