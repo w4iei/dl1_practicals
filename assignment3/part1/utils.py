@@ -35,7 +35,8 @@ def sample_reparameterize(mean, std):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    z = torch.normal(mean, std)
+    eps = torch.randn_like(std)
+    z = eps * std + mean
     #######################
     # END OF YOUR CODE    #
     #######################
