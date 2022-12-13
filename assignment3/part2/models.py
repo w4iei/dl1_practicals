@@ -273,15 +273,15 @@ class AdversarialAE(nn.Module):
         #######################
 
         z_fake_pred = self.discriminator(z_fake)
-        loss_fake = F.binary_cross_entropy_with_logits(z_fake_pred, torch.zeros(z_fake_pred.shape).to(z_fake_pred.device))
+        loss_fake = F.binary_cross_entropy_with_logits(z_fake_pred, torch.zeros(z_fake_pred.shape).to(z_fake.device))
         # fake should all result in a 0 prediction from the discriminator:
 
         z_drawn = torch.randn(z_fake.shape).to(z_fake.device)
         z_drawn_pred = self.discriminator(z_drawn)
-        loss_real = F.binary_cross_entropy_with_logits(z_drawn_pred, torch.ones(z_drawn_pred.shape).to(z_drawn_pred.device))
+        loss_real = F.binary_cross_entropy_with_logits(z_drawn_pred, torch.ones(z_drawn_pred.shape).to(z_fake.device))
 
-        acc = (torch.sum(z_fake_pred == torch.zeros(z_fake_pred.shape)) +
-               torch.sum(z_drawn_pred == torch.ones(z_drawn_pred.shape))) / (z_fake_pred.numel()*2)
+        acc = (torch.sum(z_fake_pred == torch.zeros(z_fake_pred.shape).to(z_fake.device)) +
+               torch.sum(z_drawn_pred == torch.ones(z_drawn_pred.shape).to(z_fake.device))) / (z_fake_pred.numel()*2)
 
         disc_loss = loss_fake + loss_real
         logging_dict = {"disc_loss": disc_loss,
