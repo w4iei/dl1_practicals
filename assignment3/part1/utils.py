@@ -58,7 +58,7 @@ def KLD(mean, log_std):
     #######################
     # PUT YOUR CODE HERE  #
     #######################
-    KLD = -0.5 * torch.sum(1 + log_std*2 - mean ** 2 - log_std.exp()**2, dim=1)
+    KLD = 0.5 * torch.sum( log_std.exp()**2 - 1 - 2*log_std + mean ** 2, dim=1)
     #######################
     # END OF YOUR CODE    #
     #######################
