@@ -37,7 +37,7 @@ class ConvEncoder(nn.Module):
         c_hid = 3
         act_fn = nn.GELU
         self.net = nn.Sequential(
-            nn.Conv2d(3, c_hid, kernel_size=3, padding=1, stride=2),  # 32x32 => 16x16
+            nn.Conv2d(1, c_hid, kernel_size=3, padding=1, stride=2),  # 32x32 => 16x16
             act_fn(),
             nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
             act_fn(),
@@ -111,9 +111,9 @@ class ConvDecoder(nn.Module):
             act_fn(),
             nn.Conv2d(c_hid, c_hid, kernel_size=3, padding=1),
             act_fn(),
-            nn.ConvTranspose2d(c_hid, 3, kernel_size=3, output_padding=1, padding=1, stride=2),
+            nn.ConvTranspose2d(c_hid, 1, kernel_size=3, output_padding=1, padding=1, stride=2),
             # 16x16 => 32x32
-            # nn.Tanh()  # The input images is scaled between -1 and 1, hence the output has to be bounded as well
+            nn.Tanh()  # The input images is scaled between -1 and 1, hence the output has to be bounded as well
         )
 
     #######################
@@ -131,7 +131,8 @@ class ConvDecoder(nn.Module):
         # PUT YOUR CODE HERE  #
         #######################
         recon_x = self.linear(z)
-        recon_x = recon_x.squeeze(axis=1)
+        batch_size, z_dim = z.shape
+        recon_x = recon_x.reshape(batch_size, -1, 4, 4)
         recon_x = self.net(recon_x)
         #######################
         # END OF YOUR CODE    #
@@ -159,11 +160,10 @@ class Discriminator(nn.Module):
             nn.Linear(z_dim, c_hid),
             nn.LeakyReLU(negative_slope=0.2),
 
-            nn.Linear(z_dim, c_hid),
+            nn.Linear(c_hid, c_hid),
             nn.LeakyReLU(negative_slope=0.2),
 
-            nn.Linear(z_dim, c_hid),
-            nn.LeakyReLU(negative_slope=0.2),
+            nn.Linear(c_hid, 1),
         )
         #######################
         # END OF YOUR CODE    #
@@ -273,15 +273,15 @@ class AdversarialAE(nn.Module):
         #######################
 
         z_fake_pred = self.discriminator(z_fake)
-        loss_fake = F.binary_cross_entropy_with_logits(z_fake_pred, torch.zeros(z_fake_pred.size))
+        loss_fake = F.binary_cross_entropy_with_logits(z_fake_pred, torch.zeros(z_fake_pred.shape))
         # fake should all result in a 0 prediction from the discriminator:
 
         z_drawn = torch.randn(z_fake.shape)
-        z_drawn_pred = self.descriminator(z_drawn)
-        loss_real = F.binary_cross_entropy_with_logits(z_drawn_pred, torch.ones(z_drawn_pred.size))
+        z_drawn_pred = self.discriminator(z_drawn)
+        loss_real = F.binary_cross_entropy_with_logits(z_drawn_pred, torch.ones(z_drawn_pred.shape))
 
-        acc = (torch.mean(z_fake_pred == torch.zeros(z_fake_pred.size)) +
-               torch.mean(z_drawn_pred == torch.ones(z_drawn_pred.size))) / 2
+        acc = (torch.sum(z_fake_pred == torch.zeros(z_fake_pred.shape)) +
+               torch.sum(z_drawn_pred == torch.ones(z_drawn_pred.shape))) / (z_fake_pred.numel()*2)
 
         disc_loss = loss_fake + loss_real
         logging_dict = {"disc_loss": disc_loss,

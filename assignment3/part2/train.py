@@ -101,7 +101,11 @@ def train_aae(epoch, model, train_loader,
         # PUT YOUR CODE HERE  #
         #######################
         # Encoder-Decoder update
-        raise NotImplementedError
+        optimizer_ae.zero_grad()
+        recon_x, z = model(x)
+        ae_loss, ae_logging_dict = model.get_loss_autoencoder(x, recon_x, z, lambda_)
+        ae_loss.backward()
+        optimizer_ae.step()
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -109,8 +113,12 @@ def train_aae(epoch, model, train_loader,
         #######################
         # PUT YOUR CODE HERE  #
         #######################
-        # Discriminator update
-        raise NotImplementedError
+        optimizer_disc.zero_grad()
+        disc_loss, disc_log_dict = model.get_loss_discriminator(z)
+        disc_loss.backward()
+        optimizer_disc.step()
+        for key, value in disc_log_dict.items():
+            logger_disc.summary_writer.add_scalar(key, value, epoch)
         #######################
         # END OF YOUR CODE    #
         #######################
@@ -168,9 +176,9 @@ def main(args):
     #######################
     # You can use the Adam optimizer for autoencoder and SGD for discriminator.
     # It is recommended to reduce the momentum (beta1) to e.g. 0.5 for Adam optimizer.
-    optimizer_ae = None
-    optimizer_disc = None
-    raise NotImplementedError
+    optimizer_ae = optim.Adam(model.encoder.parameters() + model.decoder.parameters(),
+                              lr=args.ae_lr, betas=(0.5, 0.999))
+    optimizer_disc = optim.SGD(model.discriminator.parameters(), lr=args.d_lr)
     #######################
     # END OF YOUR CODE    #
     #######################
